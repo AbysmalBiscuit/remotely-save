@@ -37,7 +37,10 @@ export const listFilesInObsFolder = async (
   pluginId: string,
   bookmarksOnly: boolean
 ): Promise<Entity[]> => {
-  const q = new Queue([configDir]);
+  const topLevelHidden = await vault.adapter.list("/");
+  const topLevelHiddenFolders = topLevelHidden.folders.filter(item => item.startsWith("."));
+  const topLevelHiddenFiles = topLevelHidden.files.filter(item => item.startsWith("."));
+  const q = new Queue([...topLevelHiddenFolders, ...topLevelHiddenFiles]);
   const CHUNK_SIZE = 10;
   let contents: Entity[] = [];
 
