@@ -245,7 +245,7 @@ export const checkIsSkipItemOrNotByName = (
   }
 
   const checkIsHidden =
-    isHiddenPath(key, true, false) ||
+    // isHiddenPath(key, true, false) ||
     (!syncUnderscoreItems && isHiddenPath(key, false, true)) ||
     key === "/" ||
     key === DEFAULT_FILE_NAME_FOR_METADATAONREMOTE ||

@@ -87,7 +87,7 @@ describe("Encryption OpenSSL tests", () => {
     const password = "somepassword";
     const saltHex = "8302F586FAB491EC";
     const enc = await encryptArrayBuffer(
-      fileArrBuf,
+      fileArrBuf as ArrayBuffer,
       password,
       undefined,
       saltHex
@@ -109,8 +109,8 @@ describe("Encryption OpenSSL tests", () => {
       await fs.readFileSync(path.join(testFolder, testFileName))
     );
     const password = "somepassword";
-    const res1 = await encryptArrayBuffer(fileArrBuf, password);
-    const res2 = await encryptArrayBuffer(fileArrBuf, password);
+    const res1 = await encryptArrayBuffer(fileArrBuf as ArrayBuffer, password);
+    const res2 = await encryptArrayBuffer(fileArrBuf as ArrayBuffer, password);
 
     assert.ok(!Buffer.from(res1).equals(Buffer.from(res2)));
   });
@@ -123,7 +123,7 @@ describe("Encryption OpenSSL tests", () => {
       await fs.readFileSync(path.join(testFolder, testFileName + ".enc"))
     );
     const password = "somepassword";
-    const dec = await decryptArrayBuffer(fileArrBuf, password);
+    const dec = await decryptArrayBuffer(fileArrBuf as ArrayBuffer, password);
     const opensslArrBuf = bufferToArrayBuffer(
       await fs.readFileSync(path.join(testFolder, testFileName))
     );

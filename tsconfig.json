@@ -8,13 +8,22 @@
     "strict": true,
     "allowJs": true,
     "noImplicitAny": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     // "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "importHelpers": true,
     "isolatedModules": true,
-    "lib": ["dom", "es5", "scripthost", "es2015", "webworker"]
+    "lib": [
+      "dom",
+      "es5",
+      "scripthost",
+      "es2015",
+      "webworker"
+    ]
   },
-  "include": ["src/global.d.ts", "**/*.ts"]
+  "include": [
+    "src/global.d.ts",
+    "**/*.ts"
+  ]
 }
