@@ -755,8 +755,7 @@ export class FakeFsWebdav extends FakeFs {
       const tmpFileName = `${i + 1}`.padStart(5, "0");
       const tmpFileNameWithFolder = `${tmpFolderName}/${tmpFileName}`;
       console.debug(
-        `start to upload chunk ${
-          i + 1
+        `start to upload chunk ${i + 1
         } to ${tmpFileNameWithFolder} with startInclusive=${start}, endInclusive=${end}`
       );
       await clientForUpload.putFileContents(
@@ -894,7 +893,7 @@ export class FakeFsWebdav extends FakeFs {
     if (buff instanceof ArrayBuffer) {
       return buff;
     } else if (buff instanceof Buffer) {
-      return bufferToArrayBuffer(buff);
+      return bufferToArrayBuffer(buff) as ArrayBuffer;
     }
     throw Error(`unexpected file content result with type ${typeof buff}`);
   }
