@@ -1,7 +1,7 @@
 // biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
 import AggregateError from "aggregate-error";
 import cloneDeep from "lodash/cloneDeep";
-import { migrateSecretsToStorage } from "./secrets";
+import { migrateSecretsToStorage, resolveSettingsSecrets } from "./secrets";
 import throttle from "lodash/throttle";
 import { FileText, RefreshCcw, RotateCcw, createElement } from "lucide";
 import {
@@ -251,15 +251,25 @@ export default class RemotelySavePlugin extends Plugin {
       profiler,
       this.settings.deleteToWhere ?? "system"
     );
+    // Resolve secret names to actual values before connecting
+    const resolvedSettings = cloneDeep(this.settings);
+    const missingSecrets = resolveSettingsSecrets(this.app, resolvedSettings);
+    if (missingSecrets.length > 0) {
+      for (const name of missingSecrets) {
+        new Notice(`Secret '${name}' not found. Please reconfigure in settings.`);
+      }
+      throw new Error(`Missing secrets: ${missingSecrets.join(", ")}`);
+    }
+
     const fsRemote = getClient(
-      this.settings,
+      resolvedSettings,
       this.app.vault.getName(),
       async () => await this.saveSettings()
     );
     const fsEncrypt = new FakeFsEncrypt(
       fsRemote,
-      this.settings.password ?? "",
-      this.settings.encryptionMethod ?? "rclone-base64"
+      resolvedSettings.password ?? "",
+      resolvedSettings.encryptionMethod ?? "rclone-base64"
     );
 
     const t = (x: TransItemType, vars?: any) => {
@@ -662,8 +672,10 @@ export default class RemotelySavePlugin extends Plugin {
             () => self.saveSettings()
           );
 
+          const resolvedDropboxSettings = cloneDeep(this.settings);
+          resolveSettingsSecrets(this.app, resolvedDropboxSettings);
           const client = getClient(
-            this.settings,
+            resolvedDropboxSettings,
             this.app.vault.getName(),
             () => self.saveSettings()
           );
@@ -753,8 +765,10 @@ export default class RemotelySavePlugin extends Plugin {
             () => self.saveSettings()
           );
 
+          const resolvedOnedriveSettings = cloneDeep(this.settings);
+          resolveSettingsSecrets(this.app, resolvedOnedriveSettings);
           const client = getClient(
-            this.settings,
+            resolvedOnedriveSettings,
             this.app.vault.getName(),
             () => self.saveSettings()
           );
@@ -837,8 +851,10 @@ export default class RemotelySavePlugin extends Plugin {
             () => self.saveSettings()
           );
 
+          const resolvedOnedriveFullSettings = cloneDeep(this.settings);
+          resolveSettingsSecrets(this.app, resolvedOnedriveFullSettings);
           const client = getClient(
-            this.settings,
+            resolvedOnedriveFullSettings,
             this.app.vault.getName(),
             () => self.saveSettings()
           );
