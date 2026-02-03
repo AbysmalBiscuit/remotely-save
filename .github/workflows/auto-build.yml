@@ -4,10 +4,8 @@
 name: BuildCI
 
 on:
-  push:
-    branches: ["**"]
   pull_request:
-    branches: [master]
+    branches: [main]
 
 jobs:
   build:
@@ -32,20 +30,15 @@ jobs:
       KOOFR_CLIENT_ID: ${{secrets.KOOFR_CLIENT_ID}}
       KOOFR_CLIENT_SECRET: ${{secrets.KOOFR_CLIENT_SECRET}}
 
-    strategy:
-      matrix:
-        node-version: [20.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
     steps:
       - name: Checkout codes
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
       - name: Checkout LFS file list
         run: git lfs ls-files --long | cut -d ' ' -f1 | sort > .lfs-assets-id
       - name: LFS Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .git/lfs/objects
           key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}
@@ -69,7 +62,7 @@ jobs:
         run: bun run build
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: my-dist
           path: |
