@@ -17,6 +17,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
     environment: env-for-buildci
 
     env:
@@ -61,6 +66,19 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Update versions
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: node version-bump.mjs
+
+      - name: Commit updated files
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add manifest.json package.json versions.json
+          git commit -m "chore: bump version to ${{ github.ref_name }}"
+          git push origin HEAD:main # Or your default branch
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
@@ -70,14 +88,7 @@ jobs:
       - name: Build plugin
         run: bun run build
 
-      - name: Create Release And Upload
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            main.js
-            manifest.json
-            styles.css
-          token: ${{ secrets.GITHUB_TOKEN }}
-          draft: false
-          prerelease: false
-          make_latest: true
+      - name: Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bun x semantic-release
