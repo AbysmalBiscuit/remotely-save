@@ -160,6 +160,7 @@ export interface RemotelySavePluginSettings {
   azureblobstorage: AzureBlobStorageConfig;
 
   password: string;
+  secretsMigrated?: boolean;
   serviceType: SUPPORTED_SERVICES_TYPE;
   currLogLevel?: string;
   autoRunEveryMilliseconds?: number;

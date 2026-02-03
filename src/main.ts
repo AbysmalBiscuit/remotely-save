@@ -126,6 +126,7 @@ const DEFAULT_SETTINGS: RemotelySavePluginSettings = {
   koofr: DEFAULT_KOOFR_CONFIG,
   azureblobstorage: DEFAULT_AZUREBLOBSTORAGE_CONFIG,
   password: "",
+  secretsMigrated: false,
   serviceType: "s3",
   currLogLevel: "info",
   // vaultRandomID: "", // deprecated
