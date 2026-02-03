@@ -3,8 +3,8 @@
     "baseUrl": ".",
     "inlineSourceMap": true,
     "inlineSources": true,
-    "module": "ESNext",
-    "target": "es6",
+    "module": "es2022",
+    "target": "es2022",
     "strict": true,
     "allowJs": true,
     "noImplicitAny": true,
@@ -15,11 +15,11 @@
     "importHelpers": true,
     "isolatedModules": true,
     "lib": [
-      "dom",
-      "es5",
-      "scripthost",
-      "es2015",
-      "webworker"
+      "DOM",
+      "DOM.iterable",
+      "es2022",
+      "ScriptHost",
+      "WebWorker"
     ]
   },
   "include": [

@@ -13,7 +13,8 @@ if you want to view the source, please visit the github repository of this plugi
 */
 `;
 
-const VAULT_DIR = "";
+// const VAULT_DIR = "";
+const VAULT_DIR = '/mnt/c/Users/Lev/Obsidian/Dev Vault';
 const FILES = ["main.js", "manifest.json", "styles.css"];
 
 console.log(`esbuild version = ${esbuild.version}`);
@@ -50,17 +51,51 @@ const context = await esbuild.context({
   external: [
     "obsidian",
     "electron",
-    "node:url",
-    "node:fs",
-    "fs",
-    "tls",
-    "net",
-    "http",
-    "https",
-    "vm",
+    "commonjs2",
+    // "node:url",
+    // "node:fs",
+    // "fs",
+    // "tls",
+    // "net",
+    // "http",
+    // "https",
+    // "vm",
     // "process",
     // ...builtins
   ],
+  alias: {
+    // assert: require.resolve("assert"),
+    // buffer: require.resolve("buffer/"),
+    // console: require.resolve("console-browserify"),
+    // constants: require.resolve("constants-browserify"),
+    crypto: "crypto-browserify",
+    // crypto: false,
+    //domain: "domain-browser",
+    //events: "events",
+    // fs: "./empty-shim.mjs",
+    http: "./empty-shim.mjs",
+    //http: "stream-http",
+    https: "./empty-shim.mjs",
+    //https: "https-browserify",
+    net: "./empty-shim.mjs",
+    //os: "os-browserify/browser",
+    path: "path-browserify",
+    //punycode: "punycode",
+    process: "process/browser",
+    //querystring: "querystring-es3",
+    stream: "stream-browserify",
+    //string_decoder: "string_decoder",
+    //sys: "util",
+    //timers: "timers-browserify",
+    tls: "./empty-shim.mjs",
+    //tty: "tty-browserify",
+    url: "url",
+    "node:url": "url",
+    // util: require.resolve("util"),
+    // vm: require.resolve("vm-browserify"),
+    vm: "./empty-shim.mjs",
+    // zlib: require.resolve("browserify-zlib"),
+  },
   inject: ["./esbuild.injecthelper.mjs"],
   format: "cjs",
   // watch: !prod, // no longer valid in esbuild 0.17
@@ -98,6 +133,8 @@ const context = await esbuild.context({
     "globalThis.process.versions": `undefined`,
   },
   plugins: [inlineWorkerPlugin()],
+  nodePaths: ["node_modules"],
+  mainFields: ["browser", "module", "main"],
 });
 
 if (process.argv.includes("--watch")) {
