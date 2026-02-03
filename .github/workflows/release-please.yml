@@ -1,0 +1,124 @@
+name: release-please
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+      - run: bun test
+      - run: bun run build
+
+  release-please:
+    needs: test
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          # this assumes that you have created a personal access token
+          # (PAT) and configured it as a GitHub action secret named
+          # `MY_RELEASE_PLEASE_TOKEN` (this secret name is not important).
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          # this is a built-in strategy in release-please, see "Action Inputs"
+          # for more options
+          release-type: node
+
+  build-and-release:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    environment: env-for-buildci
+    env:
+      DROPBOX_APP_KEY: ${{secrets.DROPBOX_APP_KEY}}
+      ONEDRIVE_CLIENT_ID: ${{secrets.ONEDRIVE_CLIENT_ID}}
+      ONEDRIVE_AUTHORITY: ${{secrets.ONEDRIVE_AUTHORITY}}
+      REMOTELYSAVE_WEBSITE: ${{secrets.REMOTELYSAVE_WEBSITE}}
+      REMOTELYSAVE_CLIENT_ID: ${{secrets.REMOTELYSAVE_CLIENT_ID}}
+      GOOGLEDRIVE_CLIENT_ID: ${{secrets.GOOGLEDRIVE_CLIENT_ID}}
+      GOOGLEDRIVE_CLIENT_SECRET: ${{secrets.GOOGLEDRIVE_CLIENT_SECRET}}
+      BOX_CLIENT_ID: ${{secrets.BOX_CLIENT_ID}}
+      BOX_CLIENT_SECRET: ${{secrets.BOX_CLIENT_SECRET}}
+      PCLOUD_CLIENT_ID: ${{secrets.PCLOUD_CLIENT_ID}}
+      PCLOUD_CLIENT_SECRET: ${{secrets.PCLOUD_CLIENT_SECRET}}
+      YANDEXDISK_CLIENT_ID: ${{secrets.YANDEXDISK_CLIENT_ID}}
+      YANDEXDISK_CLIENT_SECRET: ${{secrets.YANDEXDISK_CLIENT_SECRET}}
+      KOOFR_CLIENT_ID: ${{secrets.KOOFR_CLIENT_ID}}
+      KOOFR_CLIENT_SECRET: ${{secrets.KOOFR_CLIENT_SECRET}}
+
+    steps:
+      - name: Checkout codes
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+
+      - name: Checkout LFS file list
+        run: git lfs ls-files --long | cut -d ' ' -f1 | sort > .lfs-assets-id
+
+      - name: LFS Cache
+        uses: actions/cache@v4
+        with:
+          path: .git/lfs/objects
+          key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}
+          restore-keys: |
+            ${{ runner.os }}-lfs-
+
+      - name: Git LFS Pull
+        run: git lfs pull
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Sync Versions
+        run: |
+          NEW_VERSION=$(jq -r '.version' package.json)
+          jq ".version = \"$NEW_VERSION\"" manifest.json > tmp.json && mv tmp.json manifest.json
+          MIN_APP=$(jq -r '.minAppVersion' manifest.json)
+          jq ". + {\"$NEW_VERSION\": \"$MIN_APP\"}" versions.json > v_tmp.json && mv v_tmp.json versions.json
+
+      - name: Commit and push updated manifests
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git remote add gh-token "https://${{ secrets.GITHUB_TOKEN }}@AbysmalBiscuit/remotely-save.nvim.git"
+          git add manifest.json versions.json
+          NEW_VERSION=$(jq -r '.version' package.json)
+          git commit -m "chore: update obsidian manifests for $NEW_VERSION [skip ci]"
+          git push
+          git tag -f $NEW_VERSION
+          git push origin $NEW_VERSION --force
+
+      - name: Build
+        run: |
+          bun run build
+
+      - name: Upload Release Assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ needs.release-please.outputs.tag_name }} \
+            main.js \
+            manifest.json \
+            styles.css \
+            --clobber
