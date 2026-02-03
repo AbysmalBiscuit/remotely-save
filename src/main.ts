@@ -1,6 +1,7 @@
 // biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
 import AggregateError from "aggregate-error";
 import cloneDeep from "lodash/cloneDeep";
+import { migrateSecretsToStorage } from "./secrets";
 import throttle from "lodash/throttle";
 import { FileText, RefreshCcw, RotateCcw, createElement } from "lucide";
 import {
@@ -538,6 +539,13 @@ export default class RemotelySavePlugin extends Plugin {
     this.syncEvent = new Events();
 
     await this.loadSettings();
+
+    // Migrate raw credentials to SecretStorage
+    const didMigrate = await migrateSecretsToStorage(this.app, this.settings);
+    if (didMigrate) {
+      await this.saveSettings();
+      new Notice("Migrated credentials to Obsidian's secure storage.");
+    }
 
     // MUST after loadSettings and before prepareDB
     const profileID: string = this.getCurrProfileID();
