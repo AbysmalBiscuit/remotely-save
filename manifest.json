@@ -2,7 +2,7 @@
   "id": "ab-remotely-save",
   "name": "AB Remotely Save",
   "version": "0.5.26",
-  "minAppVersion": "1.10.0",
+  "minAppVersion": "1.11.1",
   "description": "(This is a fork of https://github.com/fyears/remotely-save) Yet another unofficial plugin allowing users to synchronize notes between local device and the cloud service.",
   "author": "AbysmalBiscuit",
   "authorUrl": "https://github.com/AbysmalBiscuit",
