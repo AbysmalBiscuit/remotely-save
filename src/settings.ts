@@ -5,6 +5,7 @@ import {
   Notice,
   Platform,
   PluginSettingTab,
+  SecretComponent,
   Setting,
   requireApiVersion,
 } from "obsidian";
@@ -927,30 +928,26 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
     new Setting(s3Div)
       .setName(t("settings_s3_accesskeyid"))
       .setDesc(t("settings_s3_accesskeyid_desc"))
-      .addText((text) => {
-        wrapTextWithPasswordHide(text);
-        text
-          .setPlaceholder("")
-          .setValue(`${this.plugin.settings.s3.s3AccessKeyID}`)
+      .addComponent((el) =>
+        new SecretComponent(this.app, el)
+          .setValue(this.plugin.settings.s3.s3AccessKeyID)
           .onChange(async (value) => {
-            this.plugin.settings.s3.s3AccessKeyID = value.trim();
+            this.plugin.settings.s3.s3AccessKeyID = value;
             await this.plugin.saveSettings();
-          });
-      });
+          })
+      );
 
     new Setting(s3Div)
       .setName(t("settings_s3_secretaccesskey"))
       .setDesc(t("settings_s3_secretaccesskey_desc"))
-      .addText((text) => {
-        wrapTextWithPasswordHide(text);
-        text
-          .setPlaceholder("")
-          .setValue(`${this.plugin.settings.s3.s3SecretAccessKey}`)
+      .addComponent((el) =>
+        new SecretComponent(this.app, el)
+          .setValue(this.plugin.settings.s3.s3SecretAccessKey)
           .onChange(async (value) => {
-            this.plugin.settings.s3.s3SecretAccessKey = value.trim();
+            this.plugin.settings.s3.s3SecretAccessKey = value;
             await this.plugin.saveSettings();
-          });
-      });
+          })
+      );
 
     new Setting(s3Div)
       .setName(t("settings_s3_bucketname"))
@@ -2042,15 +2039,13 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
     passwordSetting
       .setName(t("settings_password"))
       .setDesc(t("settings_password_desc"))
-      .addText((text) => {
-        wrapTextWithPasswordHide(text);
-        text
-          .setPlaceholder("")
-          .setValue(`${this.plugin.settings.password}`)
+      .addComponent((el) =>
+        new SecretComponent(this.app, el)
+          .setValue(this.plugin.settings.password)
           .onChange(async (value) => {
-            newPassword = value.trim();
-          });
-      })
+            newPassword = value;
+          })
+      )
       .addButton(async (button) => {
         button.setButtonText(t("confirm"));
         button.onClick(async () => {
