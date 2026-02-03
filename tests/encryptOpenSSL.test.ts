@@ -1,3 +1,5 @@
+import { spawnSync } from "bun";
+
 import { strict as assert } from "assert";
 import * as fs from "fs";
 import * as path from "path";
@@ -52,11 +54,8 @@ describe("Encryption OpenSSL tests", () => {
   });
 
   it("should encrypt text file and get the same result as openssl", async () => {
-    const fileContent = (
-      await fs.readFileSync(
-        path.join(__dirname, "static_assets", "sometext.txt")
-      )
-    ).toString("utf-8");
+    const filePath = path.join(__dirname, "static_assets", "sometext.txt");
+    const fileContent = (await fs.readFileSync(filePath)).toString("utf-8");
     const password = "somepassword";
     const saltHex = "8302F586FAB491EC";
     const enc = await encryptStringToBase64url(
@@ -69,11 +68,34 @@ describe("Encryption OpenSSL tests", () => {
     // two command returns same result:
     // cat ./sometext.txt | openssl enc -p -aes-256-cbc -S 8302F586FAB491EC -pbkdf2 -iter 20000 -base64 -pass pass:somepassword
     // openssl enc -p -aes-256-cbc -S 8302F586FAB491EC -pbkdf2 -iter 20000 -base64 -pass pass:somepassword -in ./sometext.txt
-    const opensslBase64Res =
-      "U2FsdGVkX1+DAvWG+rSR7BPXMnlvSSVGMdjsx7kE1CTH+28P+yAZRdDGgFWMGkMd";
-    // we output base32, so we need some transformation
-    const opensslBase64urlRes = base64ToBase64url(opensslBase64Res);
+    // const opensslBase64Res = "U2FsdGVkX1+DAvWG+rSR7BPXMnlvSSVGMdjsx7kE1CTH+28P+yAZRdDGgFWMGkMd";
+    // U2FsdGVkX1-DAvWG-rSR7BPXMnlvSSVGMdjsx7kE1CTH-28P-yAZRdDGgFWMGkMd
+    let opensslBase64urlRes;
+    try {
 
+      const proc = Bun.spawnSync([
+        "openssl", "enc", "-aes-256-cbc",
+        "-S", saltHex,
+        "-pbkdf2", "-iter", "20000", "-md", "sha256",
+        "-pass", `pass:${password}`, // Remove -base64 here
+        "-in", filePath
+      ]);
+
+      const opensslCiphertext = proc.stdout;
+      const magic = Buffer.from("Salted__", "ascii");
+      const salt = Buffer.from(saltHex, "hex");
+      const header = Buffer.concat([magic, salt]);
+      const fullBinary = Buffer.concat([header, opensslCiphertext]);
+      opensslBase64urlRes = fullBinary
+        .toString("base64")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
+    } catch (spawnError) {
+      opensslBase64urlRes = "U2FsdGVkX1+DAvWG+rSR7BPXMnlvSSVGMdjsx7kE1CTH+28P+yAZRdDGgFWMGkMd";
+    }
+
+    console.log(enc, opensslBase64urlRes)
     assert.equal(enc, opensslBase64urlRes);
   });
 
