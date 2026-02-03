@@ -10,8 +10,8 @@ name: Release A New Version
 
 on:
   push:
-    tags:
-      - "*" # Push events to matching any tag format, i.e. 1.0, 20.15.10
+    branches:
+      - main
 
 jobs:
   build:
@@ -46,6 +46,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
 
       - name: Checkout LFS file list
         run: git lfs ls-files --long | cut -d ' ' -f1 | sort > .lfs-assets-id
