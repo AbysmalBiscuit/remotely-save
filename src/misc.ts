@@ -89,8 +89,8 @@ export const mkdirpInVault = async (thePath: string, vault: Vault) => {
  */
 export const bufferToArrayBuffer = (
   b: Buffer | Uint8Array | ArrayBufferView
-) => {
-  return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+): ArrayBuffer => {
+  return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) as ArrayBuffer;
 };
 
 /**
@@ -98,23 +98,23 @@ export const bufferToArrayBuffer = (
  * @param b
  * @returns
  */
-export const arrayBufferToBuffer = (b: ArrayBuffer) => {
+export const arrayBufferToBuffer = (b: ArrayBuffer): Buffer<ArrayBuffer> => {
   return Buffer.from(b);
 };
 
-export const arrayBufferToBase64 = (b: ArrayBuffer) => {
+export const arrayBufferToBase64 = (b: ArrayBuffer): string => {
   return arrayBufferToBuffer(b).toString("base64");
 };
 
-export const arrayBufferToHex = (b: ArrayBuffer) => {
+export const arrayBufferToHex = (b: ArrayBuffer): string => {
   return arrayBufferToBuffer(b).toString("hex");
 };
 
-export const base64ToArrayBuffer = (b64text: string) => {
+export const base64ToArrayBuffer = (b64text: string): ArrayBuffer => {
   return bufferToArrayBuffer(Buffer.from(b64text, "base64"));
 };
 
-export const copyArrayBuffer = (src: ArrayBuffer) => {
+export const copyArrayBuffer = (src: ArrayBuffer): ArrayBuffer => {
   const dst = new ArrayBuffer(src.byteLength);
   new Uint8Array(dst).set(new Uint8Array(src));
   return dst;
@@ -125,7 +125,7 @@ export const copyArrayBuffer = (src: ArrayBuffer) => {
  * @param hex
  * @returns
  */
-export const hexStringToTypedArray = (hex: string) => {
+export const hexStringToTypedArray = (hex: string): Uint8Array<ArrayBuffer> => {
   const f = hex.match(/[\da-f]{2}/gi);
   if (f === null) {
     throw Error(`input ${hex} is not hex, no way to transform`);

@@ -73,12 +73,12 @@ const fromBlobPropsToEntity = (
   if (mtimeStr !== undefined && mtimeStr !== "") {
     try {
       mtimeCli = new Date(mtimeStr).valueOf();
-    } catch {}
+    } catch { }
   }
 
   let hash: undefined | string = undefined;
   if (props.contentMD5 !== undefined) {
-    hash = arrayBufferToHex(props.contentMD5.buffer);
+    hash = arrayBufferToHex(props.contentMD5.buffer as ArrayBuffer);
   }
 
   const entity: Entity = {
@@ -303,7 +303,7 @@ export class FakeFsAzureBlobStorage extends FakeFs {
       try {
         const blobClient = this.containerClient.getBlockBlobClient(blobPath);
         await blobClient.deleteIfExists();
-      } catch (e) {}
+      } catch (e) { }
     } else {
       // the file should really exist
       const blobClient = this.containerClient.getBlockBlobClient(blobPath);

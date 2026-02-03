@@ -242,9 +242,8 @@ const getOnedrivePath = (fileOrFolderPath: string, remoteBaseDir: string) => {
 
 const constructFromDriveItemToEntityError = (x: DriveItem) => {
   const fullPathOriginal = `${x.parentReference?.path}/${x.name}`;
-  return `parentPath="${
-    x.parentReference?.path ?? "(no parentReference or path)"
-  }", selfName="${x.name}"`;
+  return `parentPath="${x.parentReference?.path ?? "(no parentReference or path)"
+    }", selfName="${x.name}"`;
 };
 
 const fromDriveItemToEntity = (x: DriveItem, remoteBaseDir: string): Entity => {
@@ -582,8 +581,7 @@ export class FakeFsOnedriveFull extends FakeFs {
   ) {
     const theUrl = this._buildUrl(pathFragOrig);
     console.debug(
-      `putUint8ArrayByRange, theUrl=${theUrl}, range=${rangeStart}-${
-        rangeEnd - 1
+      `putUint8ArrayByRange, theUrl=${theUrl}, range=${rangeStart}-${rangeEnd - 1
       }, len=${rangeEnd - rangeStart}, size=${size}`
     );
     // NO AUTH HEADER here!
@@ -607,7 +605,7 @@ export class FakeFsOnedriveFull extends FakeFs {
     } else {
       const res = await fetch(theUrl, {
         method: "PUT",
-        body: payload.subarray(rangeStart, rangeEnd),
+        body: payload.subarray(rangeStart, rangeEnd) as BodyInit,
         headers: {
           "Content-Length": `${rangeEnd - rangeStart}`,
           "Content-Range": `bytes ${rangeStart}-${rangeEnd - 1}/${size}`,

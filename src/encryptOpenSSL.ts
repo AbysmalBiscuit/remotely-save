@@ -27,7 +27,7 @@ const getKeyIVFromPassword = async (
       salt: salt,
       iterations: rounds,
       hash: "SHA-256",
-    },
+    } as Pbkdf2Params,
     k1,
     256 + 128
   );
