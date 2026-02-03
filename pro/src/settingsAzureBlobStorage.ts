@@ -1,5 +1,5 @@
 import cloneDeep from "lodash/cloneDeep";
-import { type App, Modal, Notice, Setting } from "obsidian";
+import { type App, Modal, Notice, SecretComponent, Setting } from "obsidian";
 import { getClient } from "../../src/fsGetter";
 import type { TransItemType } from "../../src/i18n";
 import type RemotelySavePlugin from "../../src/main";
@@ -155,16 +155,14 @@ export const generateAzureBlobStorageSettingsPart = (
     .setDesc(
       stringToFragment(t("settings_azureblobstorage_containersasurl_desc"))
     )
-    .addText((text) => {
-      wrapTextWithPasswordHide(text);
-      text
-        .setPlaceholder("")
-        .setValue(`${plugin.settings.azureblobstorage.containerSasUrl}`)
+    .addComponent((el) =>
+      new SecretComponent(app, el)
+        .setValue(plugin.settings.azureblobstorage.containerSasUrl)
         .onChange(async (value) => {
-          plugin.settings.azureblobstorage.containerSasUrl = value.trim();
+          plugin.settings.azureblobstorage.containerSasUrl = value;
           await plugin.saveSettings();
-        });
-    });
+        })
+    );
 
   new Setting(azureBlobStorageAllowedToUsedDiv)
     .setName(t("settings_azureblobstorage_containername"))
