@@ -114,3 +114,50 @@ export async function migrateSecretsToStorage(
   settings.secretsMigrated = true;
   return true;
 }
+
+/**
+ * Resolve all secret names in settings to their actual values.
+ * Mutates the settings object in place, replacing secret names with
+ * resolved values. Call this before passing settings to getClient/FakeFsEncrypt.
+ *
+ * Returns a list of secret names that could not be resolved.
+ */
+export function resolveSettingsSecrets(
+  app: App,
+  settings: RemotelySavePluginSettings
+): string[] {
+  if (!settings.secretsMigrated) {
+    return []; // Not migrated yet — settings contain raw values, nothing to resolve
+  }
+
+  const missing: string[] = [];
+
+  for (const [dotPath, secretName] of Object.entries(SECRET_FIELD_MAP)) {
+    let currentValue: string;
+    if (dotPath.includes(".")) {
+      const [provider, field] = dotPath.split(".");
+      currentValue = (settings as any)[provider]?.[field] ?? "";
+    } else {
+      currentValue = (settings as any)[dotPath] ?? "";
+    }
+
+    // Only resolve if the field holds a secret name (not empty)
+    if (!currentValue) continue;
+
+    const resolved = resolveSecret(app, currentValue);
+    if (resolved === null) {
+      missing.push(currentValue);
+      continue;
+    }
+
+    // Write the resolved value back into settings for this sync session
+    if (dotPath.includes(".")) {
+      const [provider, field] = dotPath.split(".");
+      (settings as any)[provider][field] = resolved;
+    } else {
+      (settings as any)[dotPath] = resolved;
+    }
+  }
+
+  return missing;
+}
