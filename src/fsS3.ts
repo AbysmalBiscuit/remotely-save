@@ -75,8 +75,9 @@ class ObsHttpHandler extends FetchHttpHandler {
     }
 
     const { port, method } = request;
-    let url = `${request.protocol}//${request.hostname}${port ? `:${port}` : ""
-      }${path}`;
+    let url = `${request.protocol}//${request.hostname}${
+      port ? `:${port}` : ""
+    }${path}`;
     if (
       this.reverseProxyNoSignUrl !== undefined &&
       this.reverseProxyNoSignUrl !== ""
@@ -208,7 +209,7 @@ const getObjectBodyToArrayBuffer = async (
       const chunks: Uint8Array[] = [];
       b.on("data", (chunk) => chunks.push(chunk));
       b.on("error", reject);
-      b.on("end", () => resolve(bufferToArrayBuffer(Buffer.concat(chunks)) as ArrayBuffer));
+      b.on("end", () => resolve(bufferToArrayBuffer(Buffer.concat(chunks))));
     })) as ArrayBuffer;
   } else if (b instanceof ReadableStream) {
     return await new Response(b, {}).arrayBuffer();

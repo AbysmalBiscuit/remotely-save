@@ -51,13 +51,13 @@ function isLikelyEncryptedNameNotMatchMethod(
 export interface PasswordCheckType {
   ok: boolean;
   reason:
-  | "empty_remote"
-  | "unknown_encryption_method"
-  | "remote_encrypted_local_no_password"
-  | "password_matched"
-  | "password_or_method_not_matched_or_remote_not_encrypted"
-  | "likely_no_password_both_sides"
-  | "encryption_method_not_matched";
+    | "empty_remote"
+    | "unknown_encryption_method"
+    | "remote_encrypted_local_no_password"
+    | "password_matched"
+    | "password_or_method_not_matched_or_remote_not_encrypted"
+    | "likely_no_password_both_sides"
+    | "encryption_method_not_matched";
 }
 
 /**
@@ -87,8 +87,9 @@ export class FakeFsEncrypt extends FakeFs {
     this.cacheMapOrigToEnc = {};
     this.hasCacheMap = false;
 
-    this.kind = `encrypt(${this.innerFs.kind},${this.password !== "" ? method : "no password"
-      })`;
+    this.kind = `encrypt(${this.innerFs.kind},${
+      this.password !== "" ? method : "no password"
+    })`;
 
     if (this.password !== "" && method === "rclone-base64") {
       // no need to init if no password or not rclone
@@ -325,7 +326,6 @@ export class FakeFsEncrypt extends FakeFs {
       const contentEnc = await this._encryptContent(content);
       const innerEntity = await this.innerFs.writeFile(
         keyEnc,
-        // @ts-ignore
         contentEnc,
         mtime,
         ctime

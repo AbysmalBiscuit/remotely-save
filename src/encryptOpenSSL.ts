@@ -24,7 +24,6 @@ const getKeyIVFromPassword = async (
   const k2 = await window.crypto.subtle.deriveBits(
     {
       name: "PBKDF2",
-      // @ts-ignore
       salt: salt,
       iterations: rounds,
       hash: "SHA-256",
@@ -113,7 +112,6 @@ export const encryptStringToBase32 = async (
   saltHex = ""
 ) => {
   const enc = await encryptArrayBuffer(
-    // @ts-ignore
     bufferToArrayBuffer(new TextEncoder().encode(text)),
     password,
     rounds,
@@ -129,7 +127,6 @@ export const decryptBase32ToString = async (
 ) => {
   return new TextDecoder().decode(
     await decryptArrayBuffer(
-      // @ts-ignore
       bufferToArrayBuffer(base32.parse(text, { loose: true })),
       password,
       rounds
@@ -144,7 +141,6 @@ export const encryptStringToBase64url = async (
   saltHex = ""
 ) => {
   const enc = await encryptArrayBuffer(
-    // @ts-ignore
     bufferToArrayBuffer(new TextEncoder().encode(text)),
     password,
     rounds,
@@ -160,7 +156,6 @@ export const decryptBase64urlToString = async (
 ) => {
   return new TextDecoder().decode(
     await decryptArrayBuffer(
-      // @ts-ignore
       bufferToArrayBuffer(base64url.parse(text, { loose: true })),
       password,
       rounds

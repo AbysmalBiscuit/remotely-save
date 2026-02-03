@@ -175,7 +175,8 @@ async function retryReq<T>(
     try {
       if (idx !== 0) {
         console.warn(
-          `${extraHint === "" ? "" : extraHint + ": "}The ${idx + 1
+          `${extraHint === "" ? "" : extraHint + ": "}The ${
+            idx + 1
           }-th try starts at time ${Date.now()}`
         );
       }
@@ -194,8 +195,10 @@ async function retryReq<T>(
       if (idx === waitSeconds.length - 1) {
         // the last retry also failed, give up
         throw new Error(
-          `${extraHint === "" ? "" : extraHint + ": "
-          }"429 too many requests", after retrying for ${idx + 1
+          `${
+            extraHint === "" ? "" : extraHint + ": "
+          }"429 too many requests", after retrying for ${
+            idx + 1
           } times still failed.`
         );
       }
@@ -209,8 +212,10 @@ async function retryReq<T>(
       const secMin = Math.max(svrSec, fallbackSec);
       const secMax = Math.max(secMin * 1.8, 2);
       console.warn(
-        `${extraHint === "" ? "" : extraHint + ": "
-        }We have "429 too many requests" error of ${idx + 1
+        `${
+          extraHint === "" ? "" : extraHint + ": "
+        }We have "429 too many requests" error of ${
+          idx + 1
         }-th try, at time ${Date.now()}, and wait for ${secMin} ~ ${secMax} seconds to retry. Original info: ${JSON.stringify(
           err.error,
           null,
@@ -685,7 +690,6 @@ export class FakeFsDropbox extends FakeFs {
     } else if ((rsp.result as any).fileBinary !== undefined) {
       // we get a Buffer
       const content = (rsp.result as any).fileBinary as Buffer;
-      // @ts-ignore
       return bufferToArrayBuffer(content);
     } else {
       throw Error(`unknown rsp from dropbox download: ${rsp}`);
