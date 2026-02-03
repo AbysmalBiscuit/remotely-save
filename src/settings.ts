@@ -1546,13 +1546,11 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
     new Setting(webdavDiv)
       .setName(t("settings_webdav_user"))
       .setDesc(t("settings_webdav_user_desc"))
-      .addText((text) => {
-        wrapTextWithPasswordHide(text);
-        text
-          .setPlaceholder("")
+      .addComponent((el) =>
+        new SecretComponent(this.app, el)
           .setValue(this.plugin.settings.webdav.username)
           .onChange(async (value) => {
-            this.plugin.settings.webdav.username = value.trim();
+            this.plugin.settings.webdav.username = value;
             // deprecate auto on 20240116, force to manual_1
             if (
               this.plugin.settings.webdav.depth === "auto" ||
@@ -1563,19 +1561,17 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
               this.plugin.settings.webdav.depth = "manual_1";
             }
             await this.plugin.saveSettings();
-          });
-      });
+          })
+      );
 
     new Setting(webdavDiv)
       .setName(t("settings_webdav_password"))
       .setDesc(t("settings_webdav_password_desc"))
-      .addText((text) => {
-        wrapTextWithPasswordHide(text);
-        text
-          .setPlaceholder("")
+      .addComponent((el) =>
+        new SecretComponent(this.app, el)
           .setValue(this.plugin.settings.webdav.password)
           .onChange(async (value) => {
-            this.plugin.settings.webdav.password = value.trim();
+            this.plugin.settings.webdav.password = value;
             // deprecate auto on 20240116, force to manual_1
             if (
               this.plugin.settings.webdav.depth === "auto" ||
@@ -1586,8 +1582,8 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
               this.plugin.settings.webdav.depth = "manual_1";
             }
             await this.plugin.saveSettings();
-          });
-      });
+          })
+      );
 
     new Setting(webdavDiv)
       .setName(t("settings_webdav_auth"))
@@ -1760,30 +1756,26 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
     new Setting(webdisDiv)
       .setName(t("settings_webdis_user"))
       .setDesc(t("settings_webdis_user_desc"))
-      .addText((text) => {
-        wrapTextWithPasswordHide(text);
-        text
-          .setPlaceholder("")
+      .addComponent((el) =>
+        new SecretComponent(this.app, el)
           .setValue(this.plugin.settings.webdis.username ?? "")
           .onChange(async (value) => {
-            this.plugin.settings.webdis.username = (value ?? "").trim();
+            this.plugin.settings.webdis.username = value ?? "";
             await this.plugin.saveSettings();
-          });
-      });
+          })
+      );
 
     new Setting(webdisDiv)
       .setName(t("settings_webdis_password"))
       .setDesc(t("settings_webdis_password_desc"))
-      .addText((text) => {
-        wrapTextWithPasswordHide(text);
-        text
-          .setPlaceholder("")
+      .addComponent((el) =>
+        new SecretComponent(this.app, el)
           .setValue(this.plugin.settings.webdis.password ?? "")
           .onChange(async (value) => {
-            this.plugin.settings.webdis.password = (value ?? "").trim();
+            this.plugin.settings.webdis.password = value ?? "";
             await this.plugin.saveSettings();
-          });
-      });
+          })
+      );
 
     let newWebdisRemoteBaseDir =
       this.plugin.settings.webdis.remoteBaseDir || "";
