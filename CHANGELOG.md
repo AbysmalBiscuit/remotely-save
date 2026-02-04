@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.1](https://github.com/AbysmalBiscuit/remotely-save/compare/v0.6.0...v0.6.1) (2026-02-04)
+
+
+### Bug Fixes
+
+* plugin not loading on mobile ([a3c9b4e](https://github.com/AbysmalBiscuit/remotely-save/commit/a3c9b4e0022ecb39d4bed6e06770852e2752e2e7))
+* restore esbuild.injecthelper.mjs process injection ([dd05973](https://github.com/AbysmalBiscuit/remotely-save/commit/dd05973f67bc214b89f403bed29e33b2be35ed85))
+
 ## [0.6.0](https://github.com/AbysmalBiscuit/remotely-save/compare/v0.5.27...v0.6.0) (2026-02-03)
 
 
