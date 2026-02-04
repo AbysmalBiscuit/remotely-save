@@ -81,7 +81,7 @@ const context = await esbuild.context({
     //os: "os-browserify/browser",
     path: "path-browserify",
     //punycode: "punycode",
-    process: "process/browser",
+    // process: "process/browser",
     //querystring: "querystring-es3",
     stream: "stream-browserify",
     //string_decoder: "string_decoder",

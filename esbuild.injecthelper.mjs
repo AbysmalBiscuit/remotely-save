@@ -1,2 +1,4 @@
-export const Buffer = require("buffer").Buffer;
-export const process = require("process/browser");
+import { Buffer } from 'buffer';
+import process from "process/browser.js";
+
+export { Buffer, process };
