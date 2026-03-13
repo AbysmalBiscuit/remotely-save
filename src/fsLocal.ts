@@ -15,7 +15,7 @@ export class FakeFsLocal extends FakeFs {
   profiler: Profiler | undefined;
   deleteToWhere: "obsidian" | "system";
   kind: "local";
-  excludeFolders: string[] = [];
+  excludeFolders: string[];
   constructor(
     vault: Vault,
     syncConfigDir: boolean,
@@ -60,7 +60,7 @@ export class FakeFsLocal extends FakeFs {
         continue;
       }
 
-      if (this.excludeFolders.some(prefix => entry.path.startsWith(prefix))) {
+      if (this.excludeFolders.some(prefix => key.startsWith(prefix))) {
         continue;
       }
 
