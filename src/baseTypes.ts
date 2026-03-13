@@ -176,6 +176,7 @@ export interface RemotelySavePluginSettings {
   skipSizeLargerThan?: number;
   ignorePaths?: string[];
   onlyAllowPaths?: string[];
+  excludedFolders?: string[];
   enableStatusBarInfo?: boolean;
   deleteToWhere?: "system" | "obsidian";
   conflictAction?: ConflictActionType;
