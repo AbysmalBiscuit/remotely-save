@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.7.0](https://github.com/AbysmalBiscuit/remotely-save/compare/v0.6.1...v0.7.0) (2026-03-13)
+
+
+### Features
+
+* add excluded folders picker UI to settings ([b244cb4](https://github.com/AbysmalBiscuit/remotely-save/commit/b244cb44b2afe0d911d00c85b8ac9cfa789701ba))
+* add excludedFolders field to plugin settings ([4072c3d](https://github.com/AbysmalBiscuit/remotely-save/commit/4072c3d33bbcea5934e1d6246d6511c279ffc065))
+* add i18n strings for excluded folders setting ([1ad0c7c](https://github.com/AbysmalBiscuit/remotely-save/commit/1ad0c7cf71ec1ec239dd521c3c73b071bf0b79c5))
+* filter excluded folders in walk() before sync pipeline ([2f30543](https://github.com/AbysmalBiscuit/remotely-save/commit/2f30543644a3c82400b6f9a2a853cdb6fc539973))
+
+
+### Bug Fixes
+
+* apply excludedFolders in checkIsSkipItemOrNotByName so remote entries are also excluded from sync ([6e43cc5](https://github.com/AbysmalBiscuit/remotely-save/commit/6e43cc5617d2ac3054171938c104e32cbda3a32e))
+* exclude TFolder entity itself by normalizing key before prefix check ([09af2e6](https://github.com/AbysmalBiscuit/remotely-save/commit/09af2e6090b52ca3dbb9f35b0290490d1655f034))
+* pass excludedFolders to FakeFsLocal in clear dup files flow ([e90ae0b](https://github.com/AbysmalBiscuit/remotely-save/commit/e90ae0bb7d5357b090fe1ec193bfd52a56f90e2b))
+* recursively enumerate child folders of hidden directories in exclusion picker ([ebcd53a](https://github.com/AbysmalBiscuit/remotely-save/commit/ebcd53aa293a1b7a29449a5f35d9d5d612e71a5c))
+* show hidden folders in exclusion picker and remove root folder from options ([696130d](https://github.com/AbysmalBiscuit/remotely-save/commit/696130dd7405a6f9e8e48fe87273d2ffb64feee2))
+* use normalized key for folder exclusion check, remove redundant field initializer ([6e7a57c](https://github.com/AbysmalBiscuit/remotely-save/commit/6e7a57cae8389d000935b8115ed482f45d9c11d4))
+
 ## [0.6.1](https://github.com/AbysmalBiscuit/remotely-save/compare/v0.6.0...v0.6.1) (2026-02-04)
 
 
