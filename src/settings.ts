@@ -824,29 +824,46 @@ export const wrapTextWithPasswordHide = (text: TextComponent) => {
   return text;
 };
 
-class ExcludedFolderModal extends FuzzySuggestModal<TFolder> {
+class ExcludedFolderModal extends FuzzySuggestModal<string> {
   plugin: RemotelySavePlugin;
-  onChooseFolder: (folder: TFolder) => void;
+  onChooseFolder: (folderPath: string) => void;
+  private hiddenFolderPaths: string[] = [];
 
-  constructor(app: App, plugin: RemotelySavePlugin, onChooseFolder: (folder: TFolder) => void) {
+  constructor(app: App, plugin: RemotelySavePlugin, onChooseFolder: (folderPath: string) => void) {
     super(app);
     this.plugin = plugin;
     this.onChooseFolder = onChooseFolder;
   }
 
-  getItems(): TFolder[] {
+  async onOpen() {
+    try {
+      const topLevel = await this.app.vault.adapter.list("/");
+      this.hiddenFolderPaths = topLevel.folders
+        .filter(f => f.startsWith("."))
+        .map(f => f + "/");
+    } catch {
+      this.hiddenFolderPaths = [];
+    }
+    super.onOpen();
+  }
+
+  getItems(): string[] {
     const excluded = new Set(this.plugin.settings.excludedFolders ?? []);
-    return this.app.vault.getAllLoadedFiles()
+    const regular = this.app.vault.getAllLoadedFiles()
       .filter((f): f is TFolder => f instanceof TFolder)
-      .filter(f => !excluded.has(f.path + "/"));
+      .filter(f => f.path !== "" && f.path !== "/")
+      .map(f => f.path + "/")
+      .filter(p => !excluded.has(p));
+    const hidden = this.hiddenFolderPaths.filter(p => !excluded.has(p) && !regular.includes(p));
+    return [...regular, ...hidden].sort();
   }
 
-  getItemText(folder: TFolder): string {
-    return folder.path + "/";
+  getItemText(folderPath: string): string {
+    return folderPath;
   }
 
-  onChooseItem(folder: TFolder): void {
-    this.onChooseFolder(folder);
+  onChooseItem(folderPath: string): void {
+    this.onChooseFolder(folderPath);
   }
 }
 
@@ -2254,12 +2271,11 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
           button
             .setButtonText(t("settings_excludedfolders_add"))
             .onClick(() => {
-              new ExcludedFolderModal(this.app, this.plugin, async (folder) => {
-                const normalized = folder.path + "/";
-                if (!(this.plugin.settings.excludedFolders ?? []).includes(normalized)) {
+              new ExcludedFolderModal(this.app, this.plugin, async (folderPath) => {
+                if (!(this.plugin.settings.excludedFolders ?? []).includes(folderPath)) {
                   this.plugin.settings.excludedFolders = [
                     ...(this.plugin.settings.excludedFolders ?? []),
-                    normalized,
+                    folderPath,
                   ];
                   await this.plugin.saveSettings();
                   renderExcludedFoldersList();
