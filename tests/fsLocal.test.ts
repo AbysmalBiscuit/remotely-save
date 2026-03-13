@@ -11,7 +11,7 @@ function normalizeExcludedFolder(p: string): string {
 }
 
 function isExcluded(entryPath: string, excludedFolders: string[]): boolean {
-  return excludedFolders.some(prefix => entryPath.startsWith(prefix));
+  return excludedFolders.some(prefix => (entryPath + "/").startsWith(prefix));
 }
 
 describe("folder exclusion filter", () => {
@@ -49,5 +49,9 @@ describe("folder exclusion filter", () => {
 
   test("empty excludedFolders excludes nothing", () => {
     expect(isExcluded("Notes/foo.md", [])).toBe(false);
+  });
+
+  test("excludes the folder entity itself (no trailing slash in TFolder.path)", () => {
+    expect(isExcluded("Notes", ["Notes/"])).toBe(true);
   });
 });

@@ -60,7 +60,7 @@ export class FakeFsLocal extends FakeFs {
         continue;
       }
 
-      if (this.excludeFolders.some(prefix => key.startsWith(prefix))) {
+      if (this.excludeFolders.some(prefix => (key + "/").startsWith(prefix))) {
         continue;
       }
 
