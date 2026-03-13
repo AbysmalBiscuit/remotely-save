@@ -15,6 +15,7 @@ export class FakeFsLocal extends FakeFs {
   profiler: Profiler | undefined;
   deleteToWhere: "obsidian" | "system";
   kind: "local";
+  excludeFolders: string[] = [];
   constructor(
     vault: Vault,
     syncConfigDir: boolean,
@@ -22,7 +23,8 @@ export class FakeFsLocal extends FakeFs {
     configDir: string,
     pluginID: string,
     profiler: Profiler | undefined,
-    deleteToWhere: "obsidian" | "system"
+    deleteToWhere: "obsidian" | "system",
+    excludeFolders: string[] = []
   ) {
     super();
 
@@ -34,6 +36,7 @@ export class FakeFsLocal extends FakeFs {
     this.profiler = profiler;
     this.deleteToWhere = deleteToWhere;
     this.kind = "local";
+    this.excludeFolders = excludeFolders;
   }
 
   async walk(): Promise<Entity[]> {
@@ -55,7 +58,13 @@ export class FakeFsLocal extends FakeFs {
       if (entry.path === "/" || entry.path === "") {
         // ignore
         continue;
-      } else if (entry instanceof TFile) {
+      }
+
+      if (this.excludeFolders.some(prefix => entry.path.startsWith(prefix))) {
+        continue;
+      }
+
+      if (entry instanceof TFile) {
         let mtimeLocal: number | undefined = entry.stat.mtime;
         if (mtimeLocal <= 0) {
           mtimeLocal = entry.stat.ctime;

@@ -250,7 +250,8 @@ export default class RemotelySavePlugin extends Plugin {
       this.app.vault.configDir,
       this.manifest.id,
       profiler,
-      this.settings.deleteToWhere ?? "system"
+      this.settings.deleteToWhere ?? "system",
+      this.settings.excludedFolders ?? []
     );
     // Resolve secret names to actual values before connecting
     const resolvedSettings = cloneDeep(this.settings);
@@ -1935,7 +1936,8 @@ export default class RemotelySavePlugin extends Plugin {
                   this.app.vault.configDir,
                   this.manifest.id,
                   undefined,
-                  this.settings.deleteToWhere ?? "system"
+                  this.settings.deleteToWhere ?? "system",
+                  this.settings.excludedFolders ?? []
                 );
                 const s = await fsLocal.stat(filePath);
                 new Notice(JSON.stringify(s, null, 2), 10000);
