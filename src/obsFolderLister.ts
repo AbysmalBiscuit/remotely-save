@@ -35,7 +35,8 @@ export const listFilesInObsFolder = async (
   configDir: string,
   vault: Vault,
   pluginId: string,
-  bookmarksOnly: boolean
+  bookmarksOnly: boolean,
+  excludeFolders: string[],
 ): Promise<Entity[]> => {
   const topLevelHidden = await vault.adapter.list("/");
   const topLevelHiddenFolders = topLevelHidden.folders.filter(item => item.startsWith("."));
@@ -43,7 +44,6 @@ export const listFilesInObsFolder = async (
   const q = new Queue([...topLevelHiddenFolders, ...topLevelHiddenFiles]);
   const CHUNK_SIZE = 10;
   let contents: Entity[] = [];
-
   let iterRound = 0;
 
   while (q.length > 0) {
@@ -61,6 +61,9 @@ export const listFilesInObsFolder = async (
           throw Error("something goes wrong while listing hidden folder");
         }
         const isFolder = statRes.type === "folder";
+
+        if (isFolder && excludeFolders.contains(x)) return null;
+
         let children: ListedFiles | undefined = undefined;
         if (isFolder) {
           children = await vault.adapter.list(x);
@@ -92,6 +95,7 @@ export const listFilesInObsFolder = async (
       const r2 = flatten(await Promise.all(r));
 
       for (const iter of r2) {
+        if (iter === null) continue;
         contents.push(iter.itself);
         const isInsideSelfPlugin = isPluginDirItself(iter.itself.key, pluginId);
         if (iter.children !== undefined) {
@@ -122,6 +126,7 @@ export const listFilesInObsFolder = async (
         }
       }
     }
+
 
     if (bookmarksOnly && iterRound > 1) {
       // list until bookmarks.json is found or next level is arrived.

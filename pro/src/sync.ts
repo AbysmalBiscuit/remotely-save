@@ -154,10 +154,20 @@ export const checkIsSkipItemOrNotByName = (
   syncUnderscoreItems: boolean,
   configDir: string,
   ignorePaths: string[],
-  onlyAllowPaths: string[]
+  onlyAllowPaths: string[],
+  excludedFolders: string[] = []
 ): IsSkipResult => {
   if (key === undefined) {
     throw Error(`checkIsSkipItemOrNotByName meets undefined key!`);
+  }
+
+  if (excludedFolders.some(p => p.trim() !== "" && key.startsWith(p))) {
+    return {
+      enableAllowMode: false,
+      isExplicitlyAllowed: false,
+      isExplicitlyIgnored: true,
+      finalIsIgnored: true,
+    };
   }
 
   let finalIsIgnored: boolean | undefined = undefined;
@@ -367,6 +377,7 @@ const ensembleMixedEntities = async (
   syncUnderscoreItems: boolean,
   ignorePaths: string[],
   onlyAllowPaths: string[],
+  excludedFolders: string[],
   fsEncrypt: FakeFsEncrypt,
   serviceType: SUPPORTED_SERVICES_TYPE,
 
@@ -398,7 +409,8 @@ const ensembleMixedEntities = async (
       syncUnderscoreItems,
       configDir,
       ignorePaths,
-      onlyAllowPaths
+      onlyAllowPaths,
+      excludedFolders
     );
     skipOrNotResults[key] = skipOrNot;
     if (skipOrNot.finalIsIgnored && !key.startsWith(configDir)) {
@@ -425,8 +437,8 @@ const ensembleMixedEntities = async (
 
   if (
     Object.keys(finalMappings).filter((k) => !k.startsWith(configDir)).length -
-      remoteMaySkipCountAndNotConfig ===
-      0 ||
+    remoteMaySkipCountAndNotConfig ===
+    0 ||
     localEntityList.filter((e) => !e.key?.startsWith(configDir)).length === 0
   ) {
     // Special checking:
@@ -448,7 +460,8 @@ const ensembleMixedEntities = async (
           syncUnderscoreItems,
           configDir,
           ignorePaths,
-          onlyAllowPaths
+          onlyAllowPaths,
+          excludedFolders
         );
         skipOrNotResults[key] = skipOrNot;
       }
@@ -485,7 +498,8 @@ const ensembleMixedEntities = async (
         syncUnderscoreItems,
         configDir,
         ignorePaths,
-        onlyAllowPaths
+        onlyAllowPaths,
+        excludedFolders
       );
       skipOrNotResults[key] = skipOrNot;
     }
@@ -2010,6 +2024,7 @@ export async function syncer(
       settings.syncUnderscoreItems ?? false,
       settings.ignorePaths ?? [],
       settings.onlyAllowPaths ?? [],
+      settings.excludedFolders ?? [],
       fsEncrypt,
       settings.serviceType,
       profiler

@@ -151,4 +151,71 @@ describe("Sync: checkIsSkipItemOrNotByName", () => {
     ).finalIsIgnored;
     assert.ok(isSkip);
   });
+
+  it("should skip items inside excludedFolders", async () => {
+    // folder itself
+    let isSkip = checkIsSkipItemOrNotByName(
+      "Notes/",
+      false,
+      false,
+      false,
+      ".obsidian",
+      /* ignorePaths */ [],
+      /* onlyAllowPaths */ [],
+      /* excludedFolders */ ["Notes/"]
+    ).finalIsIgnored;
+    assert.ok(isSkip);
+
+    // file inside excluded folder
+    isSkip = checkIsSkipItemOrNotByName(
+      "Notes/foo.md",
+      false,
+      false,
+      false,
+      ".obsidian",
+      /* ignorePaths */ [],
+      /* onlyAllowPaths */ [],
+      /* excludedFolders */ ["Notes/"]
+    ).finalIsIgnored;
+    assert.ok(isSkip);
+
+    // nested folder inside excluded folder
+    isSkip = checkIsSkipItemOrNotByName(
+      "Notes/sub/",
+      false,
+      false,
+      false,
+      ".obsidian",
+      /* ignorePaths */ [],
+      /* onlyAllowPaths */ [],
+      /* excludedFolders */ ["Notes/"]
+    ).finalIsIgnored;
+    assert.ok(isSkip);
+
+    // sibling folder should not be excluded
+    isSkip = checkIsSkipItemOrNotByName(
+      "Notes-Old/foo.md",
+      false,
+      false,
+      false,
+      ".obsidian",
+      /* ignorePaths */ [],
+      /* onlyAllowPaths */ [],
+      /* excludedFolders */ ["Notes/"]
+    ).finalIsIgnored;
+    assert.ok(!isSkip);
+
+    // empty excludedFolders excludes nothing
+    isSkip = checkIsSkipItemOrNotByName(
+      "Notes/foo.md",
+      false,
+      false,
+      false,
+      ".obsidian",
+      /* ignorePaths */ [],
+      /* onlyAllowPaths */ [],
+      /* excludedFolders */ []
+    ).finalIsIgnored;
+    assert.ok(!isSkip);
+  });
 });

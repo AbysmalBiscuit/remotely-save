@@ -115,7 +115,8 @@ export class FakeFsLocal extends FakeFs {
         this.configDir,
         this.vault,
         this.pluginID,
-        bookmarksOnly
+        bookmarksOnly,
+        this.excludeFolders,
       );
       // console.debug(`syncFiles in obs: ${JSON.stringify(syncFiles, null, 2)}`);
       for (const f of syncFiles) {
