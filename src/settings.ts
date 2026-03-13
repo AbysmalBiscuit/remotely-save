@@ -838,9 +838,21 @@ class ExcludedFolderModal extends FuzzySuggestModal<string> {
   async onOpen() {
     try {
       const topLevel = await this.app.vault.adapter.list("/");
-      this.hiddenFolderPaths = topLevel.folders
-        .filter(f => f.startsWith("."))
-        .map(f => f + "/");
+      const queue = topLevel.folders.filter(f => f.startsWith("."));
+      const result: string[] = [];
+      while (queue.length > 0) {
+        const folderPath = queue.shift()!;
+        result.push(folderPath + "/");
+        try {
+          const children = await this.app.vault.adapter.list(folderPath);
+          for (const child of children.folders) {
+            queue.push(child);
+          }
+        } catch {
+          // skip unlistable folders
+        }
+      }
+      this.hiddenFolderPaths = result;
     } catch {
       this.hiddenFolderPaths = [];
     }
