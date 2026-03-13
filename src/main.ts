@@ -49,7 +49,7 @@ import {
   type AccessCodeResponseSuccessfulType as AccessCodeResponseSuccessfulTypeOnedriveFull,
   DEFAULT_ONEDRIVEFULL_CONFIG,
   sendAuthReq as sendAuthReqOnedriveFull,
-  setConfigBySuccessfullAuthInplace as setConfigBySuccessfullAuthInplaceOnedriveFull,
+  setConfigBySuccessfulAuthInplace as setConfigBySuccessfullAuthInplaceOnedriveFull,
 } from "../pro/src/fsOnedriveFull";
 import {
   type AuthAllowFirstRes as AuthAllowFirstResPCloud,

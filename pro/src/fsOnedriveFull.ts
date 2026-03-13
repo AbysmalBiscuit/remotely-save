@@ -188,7 +188,7 @@ export const sendRefreshTokenReq = async (
   }
 };
 
-export const setConfigBySuccessfullAuthInplace = async (
+export const setConfigBySuccessfulAuthInplace = async (
   config: OnedriveFullConfig,
   authRes: AccessCodeResponseSuccessfulType,
   saveUpdatedConfigFunc: () => Promise<any> | undefined
@@ -262,7 +262,7 @@ const fromDriveItemToEntity = (x: DriveItem, remoteBaseDir: string): Entity => {
     x.parentReference.path === undefined ||
     x.parentReference.path === null
   ) {
-    throw Error("x.parentReference.path is undefinded or null");
+    throw Error("x.parentReference.path is undefined or null");
   }
   const fullPathOriginal = `${x.parentReference?.path}/${x.name}`;
   const matchFirstPrefixRes = fullPathOriginal.startsWith(
@@ -296,7 +296,7 @@ const fromDriveItemToEntity = (x: DriveItem, remoteBaseDir: string): Entity => {
   let ctimeTry = x?.fileSystemInfo?.createdDateTime;
   if (ctimeTry === undefined || ctimeTry === null) {
     // throw Error(`onedrive cannot parse ctime: ${JSON.stringify(x, null, 2)}`);
-    // it doesn't hurt, we just use mtimeTry to fullfill
+    // it doesn't hurt, we just use mtimeTry to fulfill
     ctimeTry = mtimeTry;
   }
   const mtimeSvr = Date.parse(mtimeTry);
@@ -369,11 +369,11 @@ class MyAuthProvider implements AuthenticationProvider {
 }
 
 /**
- * to export the settings in qrcode,
+ * to export the settings in QRcode,
  * we want to "trim" or "shrink" the settings
  * @param onedriveFullConfig
  */
-export const getShrinkedSettings = (onedriveFullConfig: OnedriveFullConfig) => {
+export const getShrunkSettings = (onedriveFullConfig: OnedriveFullConfig) => {
   const config = cloneDeep(onedriveFullConfig);
   config.accessToken = "x";
   config.accessTokenExpiresInSeconds = 1;
@@ -714,7 +714,7 @@ export class FakeFsOnedriveFull extends FakeFs {
     } else {
       // https://stackoverflow.com/questions/56479865/creating-nested-folders-in-one-go-onedrive-api
       // use PATCH to create folder recursively!!!
-      const playload: any = {
+      const payload: any = {
         folder: {},
         "@microsoft.graph.conflictBehavior": "replace",
       };
@@ -728,9 +728,9 @@ export class FakeFsOnedriveFull extends FakeFs {
         fileSystemInfo["createdDateTime"] = ctimeStr;
       }
       if (Object.keys(fileSystemInfo).length > 0) {
-        playload["fileSystemInfo"] = fileSystemInfo;
+        payload["fileSystemInfo"] = fileSystemInfo;
       }
-      await this._patchJson(key, playload);
+      await this._patchJson(key, payload);
     }
     const res = await this._statFromRoot(key);
     return res;
@@ -818,13 +818,13 @@ export class FakeFsOnedriveFull extends FakeFs {
 
       // 1. create uploadSession
       // uploadFile already starts with /drive/root:/${remoteBaseDir}
-      let playload: any = {
+      let payload: any = {
         item: {
           "@microsoft.graph.conflictBehavior": "replace",
         },
       };
       if (mtime !== 0 && ctime !== 0) {
-        playload = {
+        payload = {
           item: {
             "@microsoft.graph.conflictBehavior": "replace",
 
@@ -838,7 +838,7 @@ export class FakeFsOnedriveFull extends FakeFs {
       }
       const s: UploadSession = await this._postJson(
         `${key}:/createUploadSession`,
-        playload
+        payload
       );
       const uploadUrl = s.uploadUrl!;
       console.debug("uploadSession = ");

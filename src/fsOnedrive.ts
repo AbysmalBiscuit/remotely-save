@@ -531,7 +531,7 @@ class MyAuthProvider implements AuthenticationProvider {
  * we want to "trim" or "shrink" the settings
  * @param onedriveConfig
  */
-export const getShrinkedSettings = (onedriveConfig: OnedriveConfig) => {
+export const getShrunkSettings = (onedriveConfig: OnedriveConfig) => {
   const config = cloneDeep(onedriveConfig);
   config.accessToken = "x";
   config.accessTokenExpiresInSeconds = 1;

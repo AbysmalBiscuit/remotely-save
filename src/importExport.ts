@@ -1,14 +1,14 @@
 import cloneDeep from "lodash/cloneDeep";
 import QRCode from "qrcode";
 
-import { getShrinkedSettings as getShrinkedSettingsOnedriveFull } from "../pro/src/fsOnedriveFull";
+import { getShrunkSettings as getShrunkSettingsOnedriveFull } from "../pro/src/fsOnedriveFull";
 import {
   COMMAND_URI,
   type QRExportType,
   type RemotelySavePluginSettings,
   type UriParams,
 } from "./baseTypes";
-import { getShrinkedSettings as getShrinkedSettingsOnedrive } from "./fsOnedrive";
+import { getShrunkSettings as getShrunkSettingsOnedrive } from "./fsOnedrive";
 
 export const exportQrCodeUri = async (
   settings: RemotelySavePluginSettings,
@@ -38,10 +38,10 @@ export const exportQrCodeUri = async (
   } else if (exportFields === "dropbox") {
     settings2 = { dropbox: cloneDeep(settings.dropbox) };
   } else if (exportFields === "onedrive") {
-    settings2 = { onedrive: getShrinkedSettingsOnedrive(settings.onedrive) };
+    settings2 = { onedrive: getShrunkSettingsOnedrive(settings.onedrive) };
   } else if (exportFields === "onedrivefull") {
     settings2 = {
-      onedrivefull: getShrinkedSettingsOnedriveFull(settings.onedrivefull),
+      onedrivefull: getShrunkSettingsOnedriveFull(settings.onedrivefull),
     };
   } else if (exportFields === "webdav") {
     settings2 = { webdav: cloneDeep(settings.webdav) };
@@ -116,11 +116,10 @@ export const importQrCodeUri = (
   if (params.vault !== currentVaultName) {
     return {
       status: "error",
-      message: `the target vault is ${
-        params.vault
-      } but you are currently in ${currentVaultName}: ${JSON.stringify(
-        inputParams
-      )}`,
+      message: `the target vault is ${params.vault
+        } but you are currently in ${currentVaultName}: ${JSON.stringify(
+          inputParams
+        )}`,
     };
   }
 

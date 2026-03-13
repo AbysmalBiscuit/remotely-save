@@ -22,4 +22,4 @@ Go to the plugin settings, scroll down to the section "Debug" -> "alter console 
 
   If you want to check the console **directly on the mobile device**, check out [this doc](./check_vconsole_output.md).
 
-Trigger the sync manually (by clicking the icon on the ribbon sidebar). Something (hopefully) helpful should show up in the console. You could understand what happened and what goes wrong more explictly by checking the output.
+Trigger the sync manually (by clicking the icon on the ribbon sidebar). Something (hopefully) helpful should show up in the console. You could understand what happened and what goes wrong more explicitly by checking the output.
