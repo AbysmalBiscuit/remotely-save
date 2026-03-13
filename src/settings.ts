@@ -1,12 +1,14 @@
 import { Eye, EyeOff, createElement } from "lucide";
 import {
   type App,
+  FuzzySuggestModal,
   Modal,
   Notice,
   Platform,
   PluginSettingTab,
   SecretComponent,
   Setting,
+  TFolder,
   requireApiVersion,
 } from "obsidian";
 import type { TextComponent } from "obsidian";
@@ -821,6 +823,32 @@ export const wrapTextWithPasswordHide = (text: TextComponent) => {
   text.inputEl.setAttribute("type", "password");
   return text;
 };
+
+class ExcludedFolderModal extends FuzzySuggestModal<TFolder> {
+  plugin: RemotelySavePlugin;
+  onChooseFolder: (folder: TFolder) => void;
+
+  constructor(app: App, plugin: RemotelySavePlugin, onChooseFolder: (folder: TFolder) => void) {
+    super(app);
+    this.plugin = plugin;
+    this.onChooseFolder = onChooseFolder;
+  }
+
+  getItems(): TFolder[] {
+    const excluded = new Set(this.plugin.settings.excludedFolders ?? []);
+    return this.app.vault.getAllLoadedFiles()
+      .filter((f): f is TFolder => f instanceof TFolder)
+      .filter(f => !excluded.has(f.path + "/"));
+  }
+
+  getItemText(folder: TFolder): string {
+    return folder.path + "/";
+  }
+
+  onChooseItem(folder: TFolder): void {
+    this.onChooseFolder(folder);
+  }
+}
 
 export class RemotelySaveSettingTab extends PluginSettingTab {
   readonly plugin: RemotelySavePlugin;
@@ -2212,6 +2240,55 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
           });
         });
     }
+
+    // --- Excluded Folders ---
+    const excludedFoldersContainer = basicDiv.createEl("div");
+
+    const renderExcludedFoldersList = () => {
+      excludedFoldersContainer.empty();
+
+      new Setting(excludedFoldersContainer)
+        .setName(t("settings_excludedfolders"))
+        .setDesc(t("settings_excludedfolders_desc"))
+        .addButton(button => {
+          button
+            .setButtonText(t("settings_excludedfolders_add"))
+            .onClick(() => {
+              new ExcludedFolderModal(this.app, this.plugin, async (folder) => {
+                const normalized = folder.path + "/";
+                if (!(this.plugin.settings.excludedFolders ?? []).includes(normalized)) {
+                  this.plugin.settings.excludedFolders = [
+                    ...(this.plugin.settings.excludedFolders ?? []),
+                    normalized,
+                  ];
+                  await this.plugin.saveSettings();
+                  renderExcludedFoldersList();
+                }
+              }).open();
+            });
+        });
+
+      const folders = this.plugin.settings.excludedFolders ?? [];
+      if (folders.length === 0) {
+        excludedFoldersContainer.createEl("p", { text: t("settings_excludedfolders_empty") });
+      } else {
+        const list = excludedFoldersContainer.createEl("ul");
+        for (const folder of folders) {
+          const li = list.createEl("li");
+          li.createSpan({ text: folder });
+          const btn = li.createEl("button", { text: "×" });
+          btn.addEventListener("click", async () => {
+            this.plugin.settings.excludedFolders = (
+              this.plugin.settings.excludedFolders ?? []
+            ).filter(f => f !== folder);
+            await this.plugin.saveSettings();
+            renderExcludedFoldersList();
+          });
+        }
+      }
+    };
+
+    renderExcludedFoldersList();
 
     new Setting(basicDiv)
       .setName(t("settings_ignorepaths"))
