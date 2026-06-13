@@ -4,6 +4,7 @@ import { getClient } from "../../src/fsGetter";
 import type { TransItemType } from "../../src/i18n";
 import type RemotelySavePlugin from "../../src/main";
 import { stringToFragment } from "../../src/misc";
+import { getResolvedSettings } from "../../src/secrets";
 import { ChangeRemoteBaseDirModal } from "../../src/settings";
 import {
   DEFAULT_GOOGLEDRIVE_CONFIG,
@@ -357,7 +358,15 @@ export const generateGoogleDriveSettingsPart = (
       button.setButtonText(t("settings_checkonnectivity_button"));
       button.onClick(async () => {
         new Notice(t("settings_checkonnectivity_checking"));
-        const client = getClient(plugin.settings, app.vault.getName(), () =>
+        const { settings: resolvedSettings, missingSecrets } =
+          getResolvedSettings(app, plugin.settings);
+        if (missingSecrets.length > 0) {
+          new Notice(
+            `Secret '${missingSecrets[0]}' not found. Please reconfigure in settings.`
+          );
+          return;
+        }
+        const client = getClient(resolvedSettings, app.vault.getName(), () =>
           plugin.saveSettings()
         );
         const errors = { msg: "" };

@@ -1,3 +1,4 @@
+import cloneDeep from "lodash/cloneDeep";
 import type { App } from "obsidian";
 import type { RemotelySavePluginSettings } from "./baseTypes";
 
@@ -35,17 +36,14 @@ export const SECRET_FIELD_MAP: Record<string, string> = {
   "webdis.username": "remotely-save-webdis-username",
   "webdis.password": "remotely-save-webdis-password",
   "azureblobstorage.containerSasUrl": "remotely-save-azure-container-sas-url",
-  "password": "remotely-save-e2e-password",
+  password: "remotely-save-e2e-password",
 };
 
 /**
  * Resolve a secret name to its actual value from SecretStorage.
  * Returns the raw string if found, or null if not found/empty.
  */
-export function resolveSecret(
-  app: App,
-  secretName: string
-): string | null {
+export function resolveSecret(app: App, secretName: string): string | null {
   if (!secretName) return null;
   return app.secretStorage.getSecret(secretName);
 }
@@ -59,9 +57,15 @@ interface SecretMigrationEntry {
 /**
  * Scan settings for sensitive fields that contain raw values (not yet migrated
  * to SecretStorage). Returns the list of entries that need migration.
+ *
+ * When `app` is provided, fields whose value is the name of an existing secret
+ * are skipped: they already reference SecretStorage (e.g. set via
+ * SecretComponent), and wrapping them again would store the secret's name as
+ * the canonical secret's value.
  */
 export function getSecretsToMigrate(
-  settings: RemotelySavePluginSettings
+  settings: RemotelySavePluginSettings,
+  app?: App
 ): SecretMigrationEntry[] {
   if (settings.secretsMigrated) {
     return [];
@@ -78,7 +82,11 @@ export function getSecretsToMigrate(
       rawValue = (settings as any)[dotPath] ?? "";
     }
 
-    if (rawValue && rawValue !== secretName) {
+    if (
+      rawValue &&
+      rawValue !== secretName &&
+      (app === undefined || app.secretStorage.getSecret(rawValue) === null)
+    ) {
       entries.push({ secretName, rawValue, dotPath });
     }
   }
@@ -95,10 +103,7 @@ export async function migrateSecretsToStorage(
   app: App,
   settings: RemotelySavePluginSettings
 ): Promise<boolean> {
-  const entries = getSecretsToMigrate(settings);
-  if (entries.length === 0) {
-    return false;
-  }
+  const entries = getSecretsToMigrate(settings, app);
 
   for (const { secretName, rawValue, dotPath } of entries) {
     app.secretStorage.setSecret(secretName, rawValue);
@@ -111,8 +116,11 @@ export async function migrateSecretsToStorage(
     }
   }
 
+  // Always mark migrated, even when no raw values were found: fields set via
+  // SecretComponent hold secret names from the start, and resolution only
+  // runs once this flag is set.
   settings.secretsMigrated = true;
-  return true;
+  return entries.length > 0;
 }
 
 /**
@@ -132,7 +140,7 @@ export function resolveSettingsSecrets(
 
   const missing: string[] = [];
 
-  for (const [dotPath, secretName] of Object.entries(SECRET_FIELD_MAP)) {
+  for (const dotPath of Object.keys(SECRET_FIELD_MAP)) {
     let currentValue: string;
     if (dotPath.includes(".")) {
       const [provider, field] = dotPath.split(".");
@@ -160,4 +168,18 @@ export function resolveSettingsSecrets(
   }
 
   return missing;
+}
+
+/**
+ * Return a deep clone of the settings with all secret names resolved to their
+ * actual values, leaving the original (persisted) settings untouched. Use this
+ * wherever a client is built from settings (sync, check connectivity).
+ */
+export function getResolvedSettings(
+  app: App,
+  settings: RemotelySavePluginSettings
+): { settings: RemotelySavePluginSettings; missingSecrets: string[] } {
+  const resolved = cloneDeep(settings);
+  const missingSecrets = resolveSettingsSecrets(app, resolved);
+  return { settings: resolved, missingSecrets };
 }

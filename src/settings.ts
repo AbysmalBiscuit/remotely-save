@@ -71,6 +71,7 @@ import {
   stringToFragment,
 } from "./misc";
 import { DEFAULT_PROFILER_CONFIG } from "./profiler";
+import { getResolvedSettings } from "./secrets";
 
 class PasswordModal extends Modal {
   plugin: RemotelySavePlugin;
@@ -829,7 +830,11 @@ class ExcludedFolderModal extends FuzzySuggestModal<string> {
   onChooseFolder: (folderPath: string) => void;
   private hiddenFolderPaths: string[] = [];
 
-  constructor(app: App, plugin: RemotelySavePlugin, onChooseFolder: (folderPath: string) => void) {
+  constructor(
+    app: App,
+    plugin: RemotelySavePlugin,
+    onChooseFolder: (folderPath: string) => void
+  ) {
     super(app);
     this.plugin = plugin;
     this.onChooseFolder = onChooseFolder;
@@ -838,7 +843,7 @@ class ExcludedFolderModal extends FuzzySuggestModal<string> {
   async onOpen() {
     try {
       const topLevel = await this.app.vault.adapter.list("/");
-      const queue = topLevel.folders.filter(f => f.startsWith("."));
+      const queue = topLevel.folders.filter((f) => f.startsWith("."));
       const result: string[] = [];
       while (queue.length > 0) {
         const folderPath = queue.shift()!;
@@ -861,12 +866,15 @@ class ExcludedFolderModal extends FuzzySuggestModal<string> {
 
   getItems(): string[] {
     const excluded = new Set(this.plugin.settings.excludedFolders ?? []);
-    const regular = this.app.vault.getAllLoadedFiles()
+    const regular = this.app.vault
+      .getAllLoadedFiles()
       .filter((f): f is TFolder => f instanceof TFolder)
-      .filter(f => f.path !== "" && f.path !== "/")
-      .map(f => f.path + "/")
-      .filter(p => !excluded.has(p));
-    const hidden = this.hiddenFolderPaths.filter(p => !excluded.has(p) && !regular.includes(p));
+      .filter((f) => f.path !== "" && f.path !== "/")
+      .map((f) => f.path + "/")
+      .filter((p) => !excluded.has(p));
+    const hidden = this.hiddenFolderPaths.filter(
+      (p) => !excluded.has(p) && !regular.includes(p)
+    );
     return [...regular, ...hidden].sort();
   }
 
@@ -1183,8 +1191,16 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
         button.setButtonText(t("settings_checkonnectivity_button"));
         button.onClick(async () => {
           new Notice(t("settings_checkonnectivity_checking"));
+          const { settings: resolvedSettings, missingSecrets } =
+            getResolvedSettings(this.app, this.plugin.settings);
+          if (missingSecrets.length > 0) {
+            new Notice(
+              `Secret '${missingSecrets[0]}' not found. Please reconfigure in settings.`
+            );
+            return;
+          }
           const client = getClient(
-            this.plugin.settings,
+            resolvedSettings,
             this.app.vault.getName(),
             () => this.plugin.saveSettings()
           );
@@ -1362,8 +1378,16 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
         button.setButtonText(t("settings_checkonnectivity_button"));
         button.onClick(async () => {
           new Notice(t("settings_checkonnectivity_checking"));
+          const { settings: resolvedSettings, missingSecrets } =
+            getResolvedSettings(this.app, this.plugin.settings);
+          if (missingSecrets.length > 0) {
+            new Notice(
+              `Secret '${missingSecrets[0]}' not found. Please reconfigure in settings.`
+            );
+            return;
+          }
           const client = getClient(
-            this.plugin.settings,
+            resolvedSettings,
             this.app.vault.getName(),
             () => this.plugin.saveSettings()
           );
@@ -1520,8 +1544,16 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
         button.setButtonText(t("settings_checkonnectivity_button"));
         button.onClick(async () => {
           new Notice(t("settings_checkonnectivity_checking"));
+          const { settings: resolvedSettings, missingSecrets } =
+            getResolvedSettings(this.app, this.plugin.settings);
+          if (missingSecrets.length > 0) {
+            new Notice(
+              `Secret '${missingSecrets[0]}' not found. Please reconfigure in settings.`
+            );
+            return;
+          }
           const client = getClient(
-            this.plugin.settings,
+            resolvedSettings,
             this.app.vault.getName(),
             () => this.plugin.saveSettings()
           );
@@ -1741,8 +1773,16 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
         button.setButtonText(t("settings_checkonnectivity_button"));
         button.onClick(async () => {
           new Notice(t("settings_checkonnectivity_checking"));
+          const { settings: resolvedSettings, missingSecrets } =
+            getResolvedSettings(this.app, this.plugin.settings);
+          if (missingSecrets.length > 0) {
+            new Notice(
+              `Secret '${missingSecrets[0]}' not found. Please reconfigure in settings.`
+            );
+            return;
+          }
           const client = getClient(
-            this.plugin.settings,
+            resolvedSettings,
             this.app.vault.getName(),
             () => this.plugin.saveSettings()
           );
@@ -1866,8 +1906,16 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
         button.setButtonText(t("settings_checkonnectivity_button"));
         button.onClick(async () => {
           new Notice(t("settings_checkonnectivity_checking"));
+          const { settings: resolvedSettings, missingSecrets } =
+            getResolvedSettings(this.app, this.plugin.settings);
+          if (missingSecrets.length > 0) {
+            new Notice(
+              `Secret '${missingSecrets[0]}' not found. Please reconfigure in settings.`
+            );
+            return;
+          }
           const client = getClient(
-            this.plugin.settings,
+            resolvedSettings,
             this.app.vault.getName(),
             () => this.plugin.saveSettings()
           );
@@ -2279,26 +2327,36 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
       new Setting(excludedFoldersContainer)
         .setName(t("settings_excludedfolders"))
         .setDesc(t("settings_excludedfolders_desc"))
-        .addButton(button => {
+        .addButton((button) => {
           button
             .setButtonText(t("settings_excludedfolders_add"))
             .onClick(() => {
-              new ExcludedFolderModal(this.app, this.plugin, async (folderPath) => {
-                if (!(this.plugin.settings.excludedFolders ?? []).includes(folderPath)) {
-                  this.plugin.settings.excludedFolders = [
-                    ...(this.plugin.settings.excludedFolders ?? []),
-                    folderPath,
-                  ];
-                  await this.plugin.saveSettings();
-                  renderExcludedFoldersList();
+              new ExcludedFolderModal(
+                this.app,
+                this.plugin,
+                async (folderPath) => {
+                  if (
+                    !(this.plugin.settings.excludedFolders ?? []).includes(
+                      folderPath
+                    )
+                  ) {
+                    this.plugin.settings.excludedFolders = [
+                      ...(this.plugin.settings.excludedFolders ?? []),
+                      folderPath,
+                    ];
+                    await this.plugin.saveSettings();
+                    renderExcludedFoldersList();
+                  }
                 }
-              }).open();
+              ).open();
             });
         });
 
       const folders = this.plugin.settings.excludedFolders ?? [];
       if (folders.length === 0) {
-        excludedFoldersContainer.createEl("p", { text: t("settings_excludedfolders_empty") });
+        excludedFoldersContainer.createEl("p", {
+          text: t("settings_excludedfolders_empty"),
+        });
       } else {
         const list = excludedFoldersContainer.createEl("ul");
         for (const folder of folders) {
@@ -2308,7 +2366,7 @@ export class RemotelySaveSettingTab extends PluginSettingTab {
           btn.addEventListener("click", async () => {
             this.plugin.settings.excludedFolders = (
               this.plugin.settings.excludedFolders ?? []
-            ).filter(f => f !== folder);
+            ).filter((f) => f !== folder);
             await this.plugin.saveSettings();
             renderExcludedFoldersList();
           });

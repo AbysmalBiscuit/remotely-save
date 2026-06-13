@@ -1,7 +1,6 @@
 // biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
 import AggregateError from "aggregate-error";
 import cloneDeep from "lodash/cloneDeep";
-import { migrateSecretsToStorage, resolveSettingsSecrets } from "./secrets";
 import throttle from "lodash/throttle";
 import { FileText, RefreshCcw, RotateCcw, createElement } from "lucide";
 import {
@@ -110,6 +109,11 @@ import {
 } from "./localdb";
 import { changeMobileStatusBar } from "./misc";
 import { DEFAULT_PROFILER_CONFIG, Profiler } from "./profiler";
+import {
+  getResolvedSettings,
+  migrateSecretsToStorage,
+  resolveSettingsSecrets,
+} from "./secrets";
 import { RemotelySaveSettingTab } from "./settings";
 import { SyncAlgoV3Modal } from "./syncAlgoV3Notice";
 
@@ -254,11 +258,15 @@ export default class RemotelySavePlugin extends Plugin {
       this.settings.excludedFolders ?? []
     );
     // Resolve secret names to actual values before connecting
-    const resolvedSettings = cloneDeep(this.settings);
-    const missingSecrets = resolveSettingsSecrets(this.app, resolvedSettings);
+    const { settings: resolvedSettings, missingSecrets } = getResolvedSettings(
+      this.app,
+      this.settings
+    );
     if (missingSecrets.length > 0) {
       for (const name of missingSecrets) {
-        new Notice(`Secret '${name}' not found. Please reconfigure in settings.`);
+        new Notice(
+          `Secret '${name}' not found. Please reconfigure in settings.`
+        );
       }
       throw new Error(`Missing secrets: ${missingSecrets.join(", ")}`);
     }
@@ -553,9 +561,12 @@ export default class RemotelySavePlugin extends Plugin {
     await this.loadSettings();
 
     // Migrate raw credentials to SecretStorage
+    const wasAlreadyMigrated = this.settings.secretsMigrated === true;
     const didMigrate = await migrateSecretsToStorage(this.app, this.settings);
-    if (didMigrate) {
+    if (didMigrate || !wasAlreadyMigrated) {
       await this.saveSettings();
+    }
+    if (didMigrate) {
       new Notice("Migrated credentials to Obsidian's secure storage.");
     }
 
