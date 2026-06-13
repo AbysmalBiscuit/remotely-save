@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/AbysmalBiscuit/remotely-save/compare/v0.7.0...v0.7.1) (2026-06-13)
+
+
+### Bug Fixes
+
+* resolve secrets on fresh installs and in connectivity checks ([0b515f7](https://github.com/AbysmalBiscuit/remotely-save/commit/0b515f7bff84dfcec6cc2337dcce6122477d7e83))
+
 ## [0.7.0](https://github.com/AbysmalBiscuit/remotely-save/compare/v0.6.1...v0.7.0) (2026-03-13)
 
 
